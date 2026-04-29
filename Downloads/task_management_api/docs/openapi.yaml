@@ -7,7 +7,7 @@ servers:
   - url: https://task-management-api-ih36.onrender.com
 
 paths:
-  /auth/signup:
+  /api/auth/signup:
     post:
       summary: Signup user
       requestBody:
@@ -38,7 +38,7 @@ paths:
         409:
           description: Email already registered
 
-  /auth/login:
+  /api/auth/login:
     post:
       summary: Login user
       requestBody:
@@ -63,7 +63,7 @@ paths:
         401:
           description: Invalid credentials
 
-  /projects:
+  /api/projects:
     get:
       summary: Get all projects
       security:
@@ -100,7 +100,7 @@ paths:
         401:
           description: Unauthorized
 
-  /projects/{id}:
+  /api/projects/{id}:
     get:
       summary: Get project by ID
       security:
@@ -177,7 +177,7 @@ paths:
         404:
           description: Project not found
 
-  /tasks:
+  /api/tasks:
     get:
       summary: Get all tasks
       security:
@@ -227,7 +227,7 @@ paths:
         404:
           description: Project not found
 
-  /tasks/{id}:
+  /api/tasks/{id}:
     get:
       summary: Get task by ID
       security:
@@ -310,7 +310,7 @@ paths:
         404:
           description: Task not found
 
-  /comments:
+  /api/comments:
     get:
       summary: Get all comments
       security:
@@ -351,7 +351,7 @@ paths:
         404:
           description: Task not found
 
-  /comments/{id}:
+  /api/comments/{id}:
     get:
       summary: Get comment by ID
       security:
