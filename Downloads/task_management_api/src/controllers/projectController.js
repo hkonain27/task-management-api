@@ -5,6 +5,10 @@ export const createProject = async (req, res) => {
   try {
     const { title, description } = req.body;
 
+    if (!title) {
+      return res.status(400).json({ message: "Title is required." });
+    }
+
     const project = await prisma.project.create({
       data: {
         title,
@@ -13,9 +17,9 @@ export const createProject = async (req, res) => {
       },
     });
 
-    res.status(201).json(project);
+    return res.status(201).json(project);
   } catch (error) {
-    res.status(500).json({ message: "Create project failed", error: error.message });
+    return res.status(500).json({ message: "Create project failed", error: error.message });
   }
 };
 
@@ -23,12 +27,12 @@ export const createProject = async (req, res) => {
 export const getProjects = async (req, res) => {
   try {
     const projects = await prisma.project.findMany({
-      where: { userId: req.user.id },
+      where: req.user.role === "ADMIN" ? {} : { userId: req.user.id },
     });
 
-    res.json(projects);
+    return res.status(200).json(projects);
   } catch (error) {
-    res.status(500).json({ message: "Fetch failed", error: error.message });
+    return res.status(500).json({ message: "Fetch failed", error: error.message });
   }
 };
 
@@ -36,14 +40,20 @@ export const getProjects = async (req, res) => {
 export const getProjectById = async (req, res) => {
   try {
     const project = await prisma.project.findUnique({
-      where: { id: parseInt(req.params.id) },
+      where: { id: Number(req.params.id) },
     });
 
-    if (!project) return res.status(404).json({ message: "Not found" });
+    if (!project) {
+      return res.status(404).json({ message: "Project not found." });
+    }
 
-    res.json(project);
+    if (project.userId !== req.user.id && req.user.role !== "ADMIN") {
+      return res.status(403).json({ message: "Not authorized to view this project." });
+    }
+
+    return res.status(200).json(project);
   } catch (error) {
-    res.status(500).json({ message: "Fetch failed", error: error.message });
+    return res.status(500).json({ message: "Fetch failed", error: error.message });
   }
 };
 
@@ -52,26 +62,50 @@ export const updateProject = async (req, res) => {
   try {
     const { title, description } = req.body;
 
+    const existingProject = await prisma.project.findUnique({
+      where: { id: Number(req.params.id) },
+    });
+
+    if (!existingProject) {
+      return res.status(404).json({ message: "Project not found." });
+    }
+
+    if (existingProject.userId !== req.user.id && req.user.role !== "ADMIN") {
+      return res.status(403).json({ message: "Not authorized to update this project." });
+    }
+
     const project = await prisma.project.update({
-      where: { id: parseInt(req.params.id) },
+      where: { id: Number(req.params.id) },
       data: { title, description },
     });
 
-    res.json(project);
+    return res.status(200).json(project);
   } catch (error) {
-    res.status(500).json({ message: "Update failed", error: error.message });
+    return res.status(500).json({ message: "Update failed", error: error.message });
   }
 };
 
 // DELETE
 export const deleteProject = async (req, res) => {
   try {
-    await prisma.project.delete({
-      where: { id: parseInt(req.params.id) },
+    const existingProject = await prisma.project.findUnique({
+      where: { id: Number(req.params.id) },
     });
 
-    res.status(204).send();
+    if (!existingProject) {
+      return res.status(404).json({ message: "Project not found." });
+    }
+
+    if (existingProject.userId !== req.user.id && req.user.role !== "ADMIN") {
+      return res.status(403).json({ message: "Not authorized to delete this project." });
+    }
+
+    await prisma.project.delete({
+      where: { id: Number(req.params.id) },
+    });
+
+    return res.status(204).send();
   } catch (error) {
-    res.status(500).json({ message: "Delete failed", error: error.message });
+    return res.status(500).json({ message: "Delete failed", error: error.message });
   }
 };
