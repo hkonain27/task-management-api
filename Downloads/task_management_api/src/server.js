@@ -13,6 +13,8 @@ import YAML from "yamljs";
 const swaggerDocument = YAML.load("./docs/openapi.yaml");
 
 const app = express();
+
+
 app.use(cors());
 app.use(express.json());
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));

@@ -4,7 +4,7 @@ info:
   version: 1.0.0
 
 servers:
-  - url: http://localhost:3000/api
+    - url: https://task-management-api-ih36.onrender.com/api
 
 paths:
   /auth/signup:
